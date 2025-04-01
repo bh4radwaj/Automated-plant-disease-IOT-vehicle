@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RC Car Mini-Map</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <h1>RC Car Mini-Map</h1>
+  <canvas id="miniMap" width="500" height="500"></canvas>
+  <script>
+    // Load the path data
+    fetch("path.json")
+      .then(response => response.json())
+      .then(path => {
+        const canvas = document.getElementById("miniMap");
+        const ctx = canvas.getContext("2d");
+
+        // Settings
+        const scale = 2; // Scale for the map
+        const startX = canvas.width / 2; // Center the map
+        const startY = canvas.height / 2;
+
+        // Load plant image
+        const plantImage = new Image();
+        plantImage.src = "plant.png"; // Ensure "plant.png" is in the same directory
+
+        plantImage.onload = () => {
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+
+          let prevX = startX;
+          let prevY = startY;
+
+          // Draw the path
+          path.forEach(([x, y], index) => {
+            const newX = startX + x * scale;
+            const newY = startY - y * scale;
+
+            // Draw line segment
+            ctx.lineTo(newX, newY);
+            ctx.strokeStyle = "blue";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw plant images along the line
+            const segmentLength = Math.sqrt(Math.pow(newX - prevX, 2) + Math.pow(newY - prevY, 2));
+            const imageSpacing = 30; // Space between images
+            const imageCount = Math.floor(segmentLength / imageSpacing);
+
+            for (let i = 1; i <= imageCount; i++) {
+              const ratio = i / imageCount;
+              const imgX = prevX + ratio * (newX - prevX);
+              const imgY = prevY + ratio * (newY - prevY);
+              ctx.drawImage(plantImage, imgX - 3, imgY - 3, 40, 40); // Adjust size and position
+            }
+
+            // Draw points
+            ctx.fillStyle = index === 0 ? "green" : "red"; // Green for start, red for others
+            ctx.beginPath();
+            ctx.arc(newX, newY, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Update previous coordinates
+            prevX = newX;
+            prevY = newY;
+          });
+
+          // Draw the final path
+          ctx.stroke();
+        };
+      })
+      .catch(err => console.error("Error loading path data:", err));
+  </script>
+</body>
+</html>
+

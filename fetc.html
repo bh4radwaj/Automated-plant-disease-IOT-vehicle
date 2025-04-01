@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32-CAM Data Parser</title>
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch('http://192.168.4.1/commands');
+                const text = await response.text();
+                
+                // Split data by "AAAAAAAAAAAAAAAAAAAA"
+                const parts = text.split("AAAAAAAAAAAAAAAAAAAA");
+                
+                // Log the second element if it exists
+                if (parts.length > 1) {
+                    console.log(parts[1]);
+                } else {
+                    console.log("Delimiter not found or no second part available.");
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+        
+        window.onload = fetchData;
+    </script>
+</head>
+<body>
+    <h1>ESP32-CAM Data Parser</h1>
+    <p>Check the console for the extracted data.</p>
+</body>
+</html>
+
